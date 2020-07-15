@@ -43,7 +43,7 @@ RESIZED_CHAR_IMAGE_HEIGHT = 28
 MIN_CONTOUR_AREA = 100
 MAX_CHANGE_IN_LINE = 1
 
-MAX_DISTANCE_IN_HEIGHT = 1.8
+MAX_DISTANCE_IN_HEIGHT = 1.5
 
 ###################################################################################################
 def loadKNNDataAndTrainKNN():

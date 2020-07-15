@@ -15,7 +15,7 @@ SCALAR_YELLOW = (0.0, 255.0, 255.0)
 SCALAR_GREEN = (0.0, 255.0, 0.0)
 SCALAR_RED = (0.0, 0.0, 255.0)
 
-showSteps = True
+showSteps = False
 
 ###################################################################################################
 def main():
@@ -29,13 +29,13 @@ def main():
 
     #imgOriginalScene  = cv2.imread("biensoxe1.jpg")
     #imgOriginalScene  = cv2.imread("1.png") # open image
-    imgOriginalScene  = cv2.imread("5.jpg")
+    imgOriginalScene  = cv2.imread("Image/14.jpg")
 
     if imgOriginalScene is None:                            # if image was not read successfully
         print("\nerror: image not read from file \n\n")  # print error message to std out
         os.system("pause")                                  # pause so user can see error message
         return                                              # and exit program
-    # end if
+    # end if  
 
     listOfPossiblePlates = DetectPlates.detectPlatesInScene(imgOriginalScene)           # detect plates
 

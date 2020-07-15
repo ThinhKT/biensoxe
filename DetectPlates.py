@@ -12,8 +12,8 @@ import PossiblePlate
 import PossibleChar
 
 # module level variables ##########################################################################
-PLATE_WIDTH_PADDING_FACTOR = 1.8
-PLATE_HEIGHT_PADDING_FACTOR = 1.8
+PLATE_WIDTH_PADDING_FACTOR = 1.3
+PLATE_HEIGHT_PADDING_FACTOR = 1.3
 
 ###################################################################################################
 def detectPlatesInScene(imgOriginalScene):
@@ -169,24 +169,25 @@ def extractPlate(imgOriginal, listOfMatchingChars):
     DetectChars.mysort(listOfMatchingChars)    # sort chars from left to right based on x position
 
 
-    minX = listOfMatchingChars[0].intCenterX
-    maxX = listOfMatchingChars[0].intCenterX
-    minY = listOfMatchingChars[0].intCenterY
-    maxY = listOfMatchingChars[0].intCenterY
+    minX = listOfMatchingChars[0].intBoundingRectX
+    maxX = listOfMatchingChars[0].intBoundingRectX
+    minY = listOfMatchingChars[0].intBoundingRectY
+    maxY = listOfMatchingChars[0].intBoundingRectY
 
     width = listOfMatchingChars[0].intBoundingRectWidth
     height = listOfMatchingChars[0].intBoundingRectHeight
 
     for item in listOfMatchingChars:
-        if item.intCenterX < minX:
-            minX = item.intCenterX
-        if item.intCenterX > maxX:
-            maxX = item.intCenterX
-        if item.intCenterY < minY:
-            minY = item.intCenterY
-        if item.intCenterY < maxY:
-            minY = item.intCenterY
-
+        if item.intBoundingRectX < minX:
+            minX = item.intBoundingRectX
+        if item.intBoundingRectX > maxX:
+            maxX = item.intBoundingRectX
+        if item.intBoundingRectY < minY:
+            minY = item.intBoundingRectY
+        if item.intBoundingRectY > maxY:
+            maxY = item.intBoundingRectY
+    maxX += width
+    maxY += height
 
             # calculate the center point of the plate
     # fltPlateCenterX = (listOfMatchingChars[0].intCenterX + listOfMatchingChars[len(listOfMatchingChars) - 1].intCenterX) / 2.0
@@ -200,7 +201,7 @@ def extractPlate(imgOriginal, listOfMatchingChars):
             # calculate plate width and height 
     # intPlateWidth = int((listOfMatchingChars[len(listOfMatchingChars) - 1].intBoundingRectX + listOfMatchingChars[len(listOfMatchingChars) - 1].intBoundingRectWidth - listOfMatchingChars[0].intBoundingRectX) * PLATE_WIDTH_PADDING_FACTOR)
 
-    intPlateWidth = int(maxX - minX + width)
+    intPlateWidth = int((maxX - minX) * PLATE_WIDTH_PADDING_FACTOR)
 
     # intTotalOfCharHeights = 0
 
@@ -212,7 +213,7 @@ def extractPlate(imgOriginal, listOfMatchingChars):
 
     # intPlateHeight = int((listOfMatchingChars[len(listOfMatchingChars) - 1].intBoundingRectY + listOfMatchingChars[len(listOfMatchingChars) - 1].intBoundingRectHeight - listOfMatchingChars[0].intBoundingRectY) * PLATE_HEIGHT_PADDING_FACTOR)
 
-    intPlateHeight = int(maxY - minY + height)
+    intPlateHeight = int((maxY - minY) * PLATE_HEIGHT_PADDING_FACTOR)
             # calculate correction angle of plate region
     # fltOpposite = listOfMatchingChars[len(listOfMatchingChars) - 1].intCenterY - listOfMatchingChars[0].intCenterY
     # fltHypotenuse = DetectChars.distanceBetweenChars(listOfMatchingChars[0], listOfMatchingChars[len(listOfMatchingChars) - 1])
