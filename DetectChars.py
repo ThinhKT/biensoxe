@@ -86,7 +86,7 @@ def detectCharsInPlates(listOfPossiblePlates):
         possiblePlate.imgThresh = cv2.resize(possiblePlate.imgThresh, (0, 0), fx = 1.6, fy = 1.6)
         thresholdValue, possiblePlate.imgThresh = cv2.threshold(possiblePlate.imgThresh, 0.0, 255.0, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
-        img5d = GetPILImage(possiblePlate.imgThresh)
+        #img5d = GetPILImage(possiblePlate.imgThresh)
         if showSteps == True:
             cv2.imshow("5d", possiblePlate.imgThresh)
 
@@ -422,7 +422,7 @@ def recognizeCharsInPlate(imgThresh, listOfMatchingChars):
 
     # end for
 
-    img10 = GetPILImage(imgThreshColor)
+    #img10 = GetPILImage(imgThreshColor)
     if showSteps == True: # show steps #######################################################
         cv2.imshow("10", imgThreshColor)
     # end if # show steps #########################################################################
