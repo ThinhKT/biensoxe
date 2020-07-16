@@ -3,7 +3,6 @@
 import cv2
 import numpy as np
 import math
-import Main
 import random
 
 import Preprocess
@@ -11,9 +10,24 @@ import DetectChars
 import PossiblePlate
 import PossibleChar
 
-# module level variables ##########################################################################
+SCALAR_BLACK = (0.0, 0.0, 0.0)
+SCALAR_WHITE = (255.0, 255.0, 255.0)
+SCALAR_YELLOW = (0.0, 255.0, 255.0)
+SCALAR_GREEN = (0.0, 255.0, 0.0)
+SCALAR_RED = (0.0, 0.0, 255.0)
+
+showSteps = False
+
 PLATE_WIDTH_PADDING_FACTOR = 1.3
 PLATE_HEIGHT_PADDING_FACTOR = 1.3
+
+#các biến lưu để xem step
+img1a = None
+img1b = None
+img2a = None
+img2b = None
+img3 = None
+img4a = None
 
 ###################################################################################################
 def detectPlatesInScene(imgOriginalScene):
@@ -27,13 +41,15 @@ def detectPlatesInScene(imgOriginalScene):
 
     cv2.destroyAllWindows()
 
-    if Main.showSteps == True: # show steps #######################################################
+    if showSteps == True: # show steps #######################################################
         cv2.imshow("0", imgOriginalScene)
     # end if # show steps #########################################################################
 
     imgGrayscaleScene, imgThreshScene = Preprocess.preprocess(imgOriginalScene)         # preprocess to get grayscale and threshold images
 
-    if Main.showSteps == True: # show steps #######################################################
+    img1a = GetPILImage(imgGrayscaleScene)
+    img1b = GetPILImage(imgThreshScene)
+    if showSteps == True: # show steps #######################################################
         cv2.imshow("1a", imgGrayscaleScene)
         cv2.imshow("1b", imgThreshScene)
     # end if # show steps #########################################################################
@@ -42,7 +58,8 @@ def detectPlatesInScene(imgOriginalScene):
             # this function first finds all contours, then only includes contours that could be chars (without comparison to other chars yet)
     listOfPossibleCharsInScene = findPossibleCharsInScene(imgThreshScene)
 
-    if Main.showSteps == True: # show steps #######################################################
+    img2b = GetPILImage(imgContours)
+    if showSteps == True: # show steps #######################################################
         print("step 2 - len(listOfPossibleCharsInScene) = " + str(
             len(listOfPossibleCharsInScene)))  # 131 with MCLRNF1 image
 
@@ -54,7 +71,7 @@ def detectPlatesInScene(imgOriginalScene):
             contours.append(possibleChar.contour)
         # end for
 
-        cv2.drawContours(imgContours, contours, -1, Main.SCALAR_WHITE)
+        cv2.drawContours(imgContours, contours, -1, SCALAR_WHITE)
         cv2.imshow("2b", imgContours)
     # end if # show steps #########################################################################
 
@@ -63,8 +80,8 @@ def detectPlatesInScene(imgOriginalScene):
     listOfListsOfMatchingCharsInScene = DetectChars.findListOfListsOfMatchingChars(listOfPossibleCharsInScene)
     listOfListsOfMatchingCharsInScene = DetectChars.divideListOfListsOfMatchingChars(listOfListsOfMatchingCharsInScene)
 
-
-    if Main.showSteps == True: # show steps #######################################################
+    img3 = GetPILImage(imgContours)
+    if showSteps == True: # show steps #######################################################
         print("step 3 - listOfListsOfMatchingCharsInScene.Count = " + str(
             len(listOfListsOfMatchingCharsInScene)))  # 13 with MCLRNF1 image
 
@@ -98,17 +115,17 @@ def detectPlatesInScene(imgOriginalScene):
 
     print("\n" + str(len(listOfPossiblePlates)) + " possible plates found")  # 13 with MCLRNF1 image
 
-    if Main.showSteps == True: # show steps #######################################################
+    if showSteps == True: # show steps #######################################################
         print("\n")
         cv2.imshow("4a", imgContours)
 
         for i in range(0, len(listOfPossiblePlates)):
             p2fRectPoints = cv2.boxPoints(listOfPossiblePlates[i].rrLocationOfPlateInScene)
 
-            cv2.line(imgContours, tuple(p2fRectPoints[0]), tuple(p2fRectPoints[1]), Main.SCALAR_RED, 2)
-            cv2.line(imgContours, tuple(p2fRectPoints[1]), tuple(p2fRectPoints[2]), Main.SCALAR_RED, 2)
-            cv2.line(imgContours, tuple(p2fRectPoints[2]), tuple(p2fRectPoints[3]), Main.SCALAR_RED, 2)
-            cv2.line(imgContours, tuple(p2fRectPoints[3]), tuple(p2fRectPoints[0]), Main.SCALAR_RED, 2)
+            cv2.line(imgContours, tuple(p2fRectPoints[0]), tuple(p2fRectPoints[1]), SCALAR_RED, 2)
+            cv2.line(imgContours, tuple(p2fRectPoints[1]), tuple(p2fRectPoints[2]), SCALAR_RED, 2)
+            cv2.line(imgContours, tuple(p2fRectPoints[2]), tuple(p2fRectPoints[3]), SCALAR_RED, 2)
+            cv2.line(imgContours, tuple(p2fRectPoints[3]), tuple(p2fRectPoints[0]), SCALAR_RED, 2)
 
             cv2.imshow("4a", imgContours)
 
@@ -140,8 +157,8 @@ def findPossibleCharsInScene(imgThresh):
 
     for i in range(0, len(contours)):                       # for each contour
 
-        if Main.showSteps == True: # show steps ###################################################
-            cv2.drawContours(imgContours, contours, i, Main.SCALAR_WHITE)
+        if showSteps == True: # show steps ###################################################
+            cv2.drawContours(imgContours, contours, i, SCALAR_WHITE)
         # end if # show steps #####################################################################
 
         possibleChar = PossibleChar.PossibleChar(contours[i])
@@ -152,7 +169,8 @@ def findPossibleCharsInScene(imgThresh):
         # end if
     # end for
 
-    if Main.showSteps == True: # show steps #######################################################
+    img2a = GetPILImage(imgContours)
+    if showSteps == True: # show steps #######################################################
         print("\nstep 2 - len(contours) = " + str(len(contours)))  # 2362 with MCLRNF1 image
         print("step 2 - intCountOfPossibleChars = " + str(intCountOfPossibleChars))  # 131 with MCLRNF1 image
         cv2.imshow("2a", imgContours)
@@ -253,6 +271,11 @@ def extractPlate(imgOriginal, listOfMatchingChars):
     possiblePlate.imgPlate = imgCropped         # copy the cropped plate image into the applicable member variable of the possible plate
 
     return possiblePlate
+
+def GetPILImage(img):
+    pilImg = cv2.cvtColor(imgOriginalScene, cv2.COLOR_BGR2RGB)
+    pilImage = Image.fromarray(pilImg)
+    return pilImage
 
 
 
