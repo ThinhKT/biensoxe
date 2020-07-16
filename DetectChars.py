@@ -8,14 +8,13 @@ import random
 
 import Preprocess
 import PossibleChar
+import DetectPlates
 
 SCALAR_BLACK = (0.0, 0.0, 0.0)
 SCALAR_WHITE = (255.0, 255.0, 255.0)
 SCALAR_YELLOW = (0.0, 255.0, 255.0)
 SCALAR_GREEN = (0.0, 255.0, 0.0)
 SCALAR_RED = (0.0, 0.0, 255.0)
-
-showSteps = False
 
 kNearest = cv2.ml.KNearest_create()
 
@@ -78,7 +77,7 @@ def detectCharsInPlates(listOfPossiblePlates):
     for possiblePlate in listOfPossiblePlates:
         possiblePlate.imgGrayscale, possiblePlate.imgThresh = Preprocess.preprocess(possiblePlate.imgPlate)    
 
-        if showSteps == True: 
+        if DetectPlates.showSteps == True: 
             cv2.imshow("5a", possiblePlate.imgPlate)
             cv2.imshow("5b", possiblePlate.imgGrayscale)
             cv2.imshow("5c", possiblePlate.imgThresh)
@@ -87,12 +86,12 @@ def detectCharsInPlates(listOfPossiblePlates):
         thresholdValue, possiblePlate.imgThresh = cv2.threshold(possiblePlate.imgThresh, 0.0, 255.0, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
         #img5d = GetPILImage(possiblePlate.imgThresh)
-        if showSteps == True:
+        if DetectPlates.showSteps == True:
             cv2.imshow("5d", possiblePlate.imgThresh)
 
         listOfPossibleCharsInPlate = findPossibleCharsInPlate(possiblePlate.imgGrayscale, possiblePlate.imgThresh)
 
-        if showSteps == True: 
+        if DetectPlates.showSteps == True: 
             height, width, numChannels = possiblePlate.imgPlate.shape
             imgContours = np.zeros((height, width, 3), np.uint8)
             del contours[:]                                    
@@ -105,7 +104,7 @@ def detectCharsInPlates(listOfPossiblePlates):
 
         listOfListsOfMatchingCharsInPlate = findListOfListsOfMatchingChars(listOfPossibleCharsInPlate)
 
-        if showSteps == True:
+        if DetectPlates.showSteps == True:
             imgContours = np.zeros((height, width, 3), np.uint8)
             del contours[:]
 
@@ -123,7 +122,7 @@ def detectCharsInPlates(listOfPossiblePlates):
 
         if (len(listOfListsOfMatchingCharsInPlate) == 0):		
 
-            if showSteps == True:
+            if DetectPlates.showSteps == True:
                 print("chars found in plate number " + str(
                     intPlateCounter) + " = (none), click on any image and press a key to continue . . .")
                 intPlateCounter = intPlateCounter + 1
@@ -139,7 +138,7 @@ def detectCharsInPlates(listOfPossiblePlates):
             listOfListsOfMatchingCharsInPlate[i].sort(key = lambda matchingChar: matchingChar.intCenterX)       
             listOfListsOfMatchingCharsInPlate[i] = removeInnerOverlappingChars(listOfListsOfMatchingCharsInPlate[i])              
 
-        if showSteps == True:
+        if DetectPlates.showSteps == True:
             imgContours = np.zeros((height, width, 3), np.uint8)
 
             for listOfMatchingChars in listOfListsOfMatchingCharsInPlate:
@@ -166,7 +165,7 @@ def detectCharsInPlates(listOfPossiblePlates):
 
         longestListOfMatchingCharsInPlate = listOfListsOfMatchingCharsInPlate[intIndexOfLongestListOfChars]
 
-        if showSteps == True:
+        if DetectPlates.showSteps == True:
             imgContours = np.zeros((height, width, 3), np.uint8)
             del contours[:]
 
@@ -179,13 +178,13 @@ def detectCharsInPlates(listOfPossiblePlates):
 
         possiblePlate.strChars = recognizeCharsInPlate(possiblePlate.imgThresh, longestListOfMatchingCharsInPlate)
 
-        if showSteps == True: 
+        if DetectPlates.showSteps == True: 
             print("chars found in plate number " + str(
                 intPlateCounter) + " = " + possiblePlate.strChars + ", click on any image and press a key to continue . . .")
             intPlateCounter = intPlateCounter + 1
             cv2.waitKey(0)
 
-    if showSteps == True:
+    if DetectPlates.showSteps == True:
         print("\nchar detection complete, click on any image and press a key to continue . . .\n")
         cv2.waitKey(0)
 
@@ -423,7 +422,7 @@ def recognizeCharsInPlate(imgThresh, listOfMatchingChars):
     # end for
 
     #img10 = GetPILImage(imgThreshColor)
-    if showSteps == True: # show steps #######################################################
+    if DetectPlates.showSteps == True: # show steps #######################################################
         cv2.imshow("10", imgThreshColor)
     # end if # show steps #########################################################################
 
