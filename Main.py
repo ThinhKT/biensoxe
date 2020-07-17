@@ -12,7 +12,6 @@ import DetectChars
 import DetectPlates
 import PossiblePlate
 
-# module level variables ##########################################################################
 SCALAR_BLACK = (0.0, 0.0, 0.0)
 SCALAR_WHITE = (255.0, 255.0, 255.0)
 SCALAR_YELLOW = (0.0, 255.0, 255.0)
@@ -20,126 +19,96 @@ SCALAR_GREEN = (0.0, 255.0, 0.0)
 SCALAR_RED = (0.0, 0.0, 255.0)
 
 training = DetectChars.trainingData()
-if training == False:                               # if KNN training was not successful
-    print("\nerror: KNN traning was not successful\n")  # show error message
+if training == False:                             
+    print("\nerror: KNN traning was not successful\n")  
     exit()  
 
-###################################################################################################
 def main(path):
 
     imgOriginalScene  = cv2.imread(path)
 
-    if imgOriginalScene is None:                            # if image was not read successfully
-        print("\nerror: image not read from file \n\n")  # print error message to std out
-        os.system("pause")                                  # pause so user can see error message
-        return                                              # and exit program
-    # end if  
+    if imgOriginalScene is None:                     
+        print("\nerror: image not read from file \n\n")  
+        os.system("pause")                                  
+        return     
 
-    listOfPossiblePlates = DetectPlates.detectPlatesInScene(imgOriginalScene)           # detect plates
+    listOfPossiblePlates = DetectPlates.detectPlatesInScene(imgOriginalScene)       
 
-    listOfPossiblePlates = DetectChars.detectCharsInPlates(listOfPossiblePlates)        # detect chars in plates
+    listOfPossiblePlates = DetectChars.detectCharsInPlates(listOfPossiblePlates)       
 
-    #cv2.imshow("imgOriginalScene", imgOriginalScene)            # show scene image
-
-    if len(listOfPossiblePlates) == 0:                          # if no plates were found
+    if len(listOfPossiblePlates) == 0:                    
         print("\nno license plates were detected\n")
-        app.insertText('') # inform user no plates were found
-    else:                                                       # else
-                # if we get in here list of possible plates has at leat one plate
-
-                # sort the list of possible plates in DESCENDING order (most number of chars to least number of chars)
+        app.insertText('') 
+    else: 
         listOfPossiblePlates.sort(key = lambda possiblePlate: len(possiblePlate.strChars), reverse = True)
 
-                # suppose the plate with the most recognized chars (the first plate in sorted by string length descending order) is the actual plate
         licPlate = listOfPossiblePlates[0]
 
         if DetectPlates.showSteps == True:
-            cv2.imshow("imgPlate", licPlate.imgPlate)           # show crop of plate and threshold of plate
+            cv2.imshow("imgPlate", licPlate.imgPlate)       
             cv2.imshow("imgThresh", licPlate.imgThresh)
 
-        if len(licPlate.strChars) == 0:                     # if no chars were found in the plate
-            print("\nno characters were detected\n\n")  # show message
-            return                                          # and exit program
-        # end if
+        if len(licPlate.strChars) == 0:                 
+            print("\nno characters were detected\n\n")  
+            return   
 
-        drawRedRectangleAroundPlate(imgOriginalScene, licPlate)             # draw red rectangle around plate
+        drawRedRectangleAroundPlate(imgOriginalScene, licPlate)            
 
-        print("\nlicense plate read from image = " + licPlate.strChars + "\n")  # write license plate text to std out
+        print("\nlicense plate read from image = " + licPlate.strChars + "\n")  
         print("----------------------------------------")
 
-        writeLicensePlateCharsOnImage(imgOriginalScene, licPlate)           # write license plate text on the image
+        writeLicensePlateCharsOnImage(imgOriginalScene, licPlate)        
 
         if DetectPlates.showSteps == True:
-            cv2.imshow("imgOriginalScene", imgOriginalScene)                # re-show scene image
+            cv2.imshow("imgOriginalScene", imgOriginalScene)             
 
         pilImg = cv2.cvtColor(imgOriginalScene, cv2.COLOR_BGR2RGB)
         pilImage = Image.fromarray(pilImg)
         app.changeImage(pilImage)
         app.insertText(licPlate.strChars)
-
-        #cv2.imwrite("imgOriginalScene.png", imgOriginalScene)           # write image out to file
-
-    # end if else
-
-    #cv2.waitKey(0)					# hold windows open until user presses a key
-
     return
-# end main
 
-###################################################################################################
 def drawRedRectangleAroundPlate(imgOriginalScene, licPlate):
 
-    p2fRectPoints = cv2.boxPoints(licPlate.rrLocationOfPlateInScene)            # get 4 vertices of rotated rect
+    p2fRectPoints = cv2.boxPoints(licPlate.rrLocationOfPlateInScene)     
 
-    cv2.line(imgOriginalScene, tuple(p2fRectPoints[0]), tuple(p2fRectPoints[1]), SCALAR_RED, 2)         # draw 4 red lines
+    cv2.line(imgOriginalScene, tuple(p2fRectPoints[0]), tuple(p2fRectPoints[1]), SCALAR_RED, 2)      
     cv2.line(imgOriginalScene, tuple(p2fRectPoints[1]), tuple(p2fRectPoints[2]), SCALAR_RED, 2)
     cv2.line(imgOriginalScene, tuple(p2fRectPoints[2]), tuple(p2fRectPoints[3]), SCALAR_RED, 2)
     cv2.line(imgOriginalScene, tuple(p2fRectPoints[3]), tuple(p2fRectPoints[0]), SCALAR_RED, 2)
-# end function
 
-###################################################################################################
 def writeLicensePlateCharsOnImage(imgOriginalScene, licPlate):
-    ptCenterOfTextAreaX = 0                             # this will be the center of the area the text will be written to
+    ptCenterOfTextAreaX = 0                          
     ptCenterOfTextAreaY = 0
 
-    ptLowerLeftTextOriginX = 0                          # this will be the bottom left of the area that the text will be written to
+    ptLowerLeftTextOriginX = 0                      
     ptLowerLeftTextOriginY = 0
 
     sceneHeight, sceneWidth, sceneNumChannels = imgOriginalScene.shape
     plateHeight, plateWidth, plateNumChannels = licPlate.imgPlate.shape
 
-    intFontFace = cv2.FONT_HERSHEY_SIMPLEX                      # choose a plain jane font
-    fltFontScale = float(plateHeight) / 30.0                    # base font scale on height of plate area
-    intFontThickness = int(round(fltFontScale * 1.5))           # base font thickness on font scale
+    intFontFace = cv2.FONT_HERSHEY_SIMPLEX                    
+    fltFontScale = float(plateHeight) / 30.0                  
+    intFontThickness = int(round(fltFontScale * 1.5))         
 
-    textSize, baseline = cv2.getTextSize(licPlate.strChars, intFontFace, fltFontScale, intFontThickness)        # call getTextSize
+    textSize, baseline = cv2.getTextSize(licPlate.strChars, intFontFace, fltFontScale, intFontThickness)      
 
-            # unpack roatated rect into center point, width and height, and angle
     ( (intPlateCenterX, intPlateCenterY), (intPlateWidth, intPlateHeight), fltCorrectionAngleInDeg ) = licPlate.rrLocationOfPlateInScene
 
-    intPlateCenterX = int(intPlateCenterX)              # make sure center is an integer
+    intPlateCenterX = int(intPlateCenterX)           
     intPlateCenterY = int(intPlateCenterY)
 
-    ptCenterOfTextAreaX = int(intPlateCenterX)         # the horizontal location of the text area is the same as the plate
+    ptCenterOfTextAreaX = int(intPlateCenterX)       
 
-    if intPlateCenterY < (sceneHeight * 0.75):                                                  # if the license plate is in the upper 3/4 of the image
-        ptCenterOfTextAreaY = int(round(intPlateCenterY)) + int(round(plateHeight * 1.6))      # write the chars in below the plate
-    else:                                                                                       # else if the license plate is in the lower 1/4 of the image
-        ptCenterOfTextAreaY = int(round(intPlateCenterY)) - int(round(plateHeight * 1.6))      # write the chars in above the plate
-    # end if
+    if intPlateCenterY < (sceneHeight * 0.75):                                                
+        ptCenterOfTextAreaY = int(round(intPlateCenterY)) + int(round(plateHeight * 1.6))    
+    else:                                                                                     
+        ptCenterOfTextAreaY = int(round(intPlateCenterY)) - int(round(plateHeight * 1.6))     
 
-    textSizeWidth, textSizeHeight = textSize                # unpack text size width and height
+    textSizeWidth, textSizeHeight = textSize        
 
-    ptLowerLeftTextOriginX = int(ptCenterOfTextAreaX - (textSizeWidth / 2))           # calculate the lower left origin of the text area
-    ptLowerLeftTextOriginY = int(ptCenterOfTextAreaY + (textSizeHeight / 2))          # based on the text area center, width, and height
-
-            # write the text on the image
-    #cv2.putText(imgOriginalScene, licPlate.strChars, (ptLowerLeftTextOriginX, ptLowerLeftTextOriginY), intFontFace, fltFontScale, SCALAR_YELLOW, intFontThickness)
-# end function
-
-###################################################################################################
-# if __name__ == "__main__":
-#     main()
+    ptLowerLeftTextOriginX = int(ptCenterOfTextAreaX - (textSizeWidth / 2))        
+    ptLowerLeftTextOriginY = int(ptCenterOfTextAreaY + (textSizeHeight / 2))         
 
 class Application(tk.Frame):
     def __init__(self, master=None):       
@@ -150,29 +119,28 @@ class Application(tk.Frame):
         self.pack()                     #gọi hàm tạo widgets (vật dụng)
         self.create_canvas()            #khởi tạo canvas - khung chứa ảnh
         self.create_widgets()           #khởi tạo phụ kiện (button)
-        #self.create_phase_result()     #khởi tạo khung hiển thị kết quả cho từng bư
-        self.currentImage = " "
+        self.currentImage = " "         #hình cuối
 
 
     def create_widgets(self):
-        self.btnSpace = Button(master = self, text = " ", padx=80)  #thông số button
-        self.btnSpace.pack(side = "top")                                #đặt button vào form
+        self.btnSpace = Button(master = self, text = " ", padx=80) 
+        self.btnSpace.pack(side = "top")                               
 
-        self.btnGetImage = Button(master = self, text = "Chọn ảnh") #thông số button
-        self.btnGetImage["command"] = self.browseFiles                  #event click cho button
-        self.btnGetImage.pack(side = "top")                         #đặt button vào form
+        self.btnGetImage = Button(master = self, text = "Chọn ảnh") 
+        self.btnGetImage["command"] = self.browseFiles                  
+        self.btnGetImage.pack(side = "top")                        
 
-        self.space = Canvas(master = self, width = 140, height = 30)                                  #div khoảng trống
+        self.space = Canvas(master = self, width = 140, height = 30)                               
         self.space.pack(side="top")
 
-        self.btnExecute = Button(master = self, text = "Xem biển số") #thông số button
-        self.btnExecute["command"] = self._execute                 #event click cho button
-        self.btnExecute.pack(side = "top")                         #đặt button vào form
+        self.btnExecute = Button(master = self, text = "Xem biển số")
+        self.btnExecute["command"] = self._execute                 
+        self.btnExecute.pack(side = "top")                         
 
         self.result = Text(master = self, height = 1, width = 15, font=("Helvetica", 14))
         self.result.pack(side = "top")
 
-        self.space2 = Canvas(master = self, width = 140, height = 30)                                  #div khoảng trống
+        self.space2 = Canvas(master = self, width = 140, height = 30)                                
         self.space2.pack(side="top")
 
 
@@ -183,21 +151,15 @@ class Application(tk.Frame):
         self.slideImage.pack_propagate(0)
         self.slideImage.pack(side="left")
 
-        self.mainImage = Canvas(master = self, width = 700, height = 500, background = "Gray")     #thông số canvas   
-        self.mainImage.pack(side="left")                                                            #đặt canvas vào form
+        self.mainImage = Canvas(master = self, width = 700, height = 500, background = "Gray")      
+        self.mainImage.pack(side="left")                                                           
 
     def browseFiles(self):
         self.getListImage = filedialog.askopenfilenames(initialdir = ".", title = "Select a File", filetypes = (("all files", "*.*"), ("Text files", "*.txt*")))
         listImage = list(self.getListImage)
         self.LoadImageList(self.getListImage)
         self.LoadImage(self.getListImage[0])
-        # img = Image.open(self.getListImage[0])                                                #lấy ảnh từ đường dẫn filename
-        # image = img.resize((600, 500), Image.ANTIALIAS)                               #thay đổi kích cỡ ảnh theo canvas
-        # self.mainImage.image = ImageTk.PhotoImage(image)                              #gán ảnh đã resize cho canvas image
-        # self.mainImage.create_image(0,0, image = self.mainImage.image, anchor = 'nw')     #đặt ảnh vào canvas
 
-        #self.create_phase_result()
-        #self._execute(self.filename)
     def LoadImageList(self, listImage):
         for widget in self.slideImage.winfo_children():
             widget.destroy()
@@ -231,23 +193,19 @@ class Application(tk.Frame):
 
     def LoadImage(self, path):
         self.currentImage = path
-        img = Image.open(path)                                              #lấy ảnh từ đường dẫn filename
-        image = img.resize((700, 500), Image.ANTIALIAS)                             #thay đổi kích cỡ ảnh theo canvas
-        self.mainImage.image = ImageTk.PhotoImage(image)                                #gán ảnh đã resize cho canvas image
-        self.mainImage.create_image(0,0, image = self.mainImage.image, anchor = 'nw')       #đặt ảnh vào canvas
+        img = Image.open(path)                                              
+        image = img.resize((700, 500), Image.ANTIALIAS)                       
+        self.mainImage.image = ImageTk.PhotoImage(image)                                
+        self.mainImage.create_image(0,0, image = self.mainImage.image, anchor = 'nw')       
 
     def _execute(self):
         print(self.currentImage)
         main(self.currentImage)
-        #print(Main.imageFinal)
-        # image = Main.imageFinal.resize((700, 500), Image.ANTIALIAS)                             #thay đổi kích cỡ ảnh theo canvas
-        # self.mainImage.image = ImageTk.PhotoImage(image)                                #gán ảnh đã resize cho canvas image
-        # self.mainImage.create_image(0,0, image = self.mainImage.image, anchor = 'nw')       #đặt ảnh vào canvas
 
     def changeImage(self, sourceImage):
-        image = sourceImage.resize((700, 500), Image.ANTIALIAS)                             #thay đổi kích cỡ ảnh theo canvas
-        self.mainImage.image = ImageTk.PhotoImage(image)                                #gán ảnh đã resize cho canvas image
-        self.mainImage.create_image(0,0, image = self.mainImage.image, anchor = 'nw')       #đặt ảnh vào canvas
+        image = sourceImage.resize((700, 500), Image.ANTIALIAS)                         
+        self.mainImage.image = ImageTk.PhotoImage(image)                                
+        self.mainImage.create_image(0,0, image = self.mainImage.image, anchor = 'nw')      
 
     def insertText(self, text):
         self.result.delete(1.0,END)
@@ -256,9 +214,9 @@ class Application(tk.Frame):
 def a():
     app.LoadImage("Image/1.jpg")
 
-root = tk.Tk()                      #root là tên biến tự đặt, tk là thư viện tkinter, Tk() là hàm tạo form
+root = tk.Tk()                  
 app = Application(master=root)      
-app.mainloop()                      #chạy lặp form
+app.mainloop()                    
 
 
 
