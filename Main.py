@@ -19,8 +19,6 @@ SCALAR_YELLOW = (0.0, 255.0, 255.0)
 SCALAR_GREEN = (0.0, 255.0, 0.0)
 SCALAR_RED = (0.0, 0.0, 255.0)
 
-showSteps = False
-
 training = DetectChars.trainingData()
 if training == False:                               # if KNN training was not successful
     print("\nerror: KNN traning was not successful\n")  # show error message
@@ -44,7 +42,8 @@ def main(path):
     #cv2.imshow("imgOriginalScene", imgOriginalScene)            # show scene image
 
     if len(listOfPossiblePlates) == 0:                          # if no plates were found
-        print("\nno license plates were detected\n")  # inform user no plates were found
+        print("\nno license plates were detected\n")
+        app.insertText('') # inform user no plates were found
     else:                                                       # else
                 # if we get in here list of possible plates has at leat one plate
 
@@ -54,7 +53,7 @@ def main(path):
                 # suppose the plate with the most recognized chars (the first plate in sorted by string length descending order) is the actual plate
         licPlate = listOfPossiblePlates[0]
 
-        if showSteps == True:
+        if DetectPlates.showSteps == True:
             cv2.imshow("imgPlate", licPlate.imgPlate)           # show crop of plate and threshold of plate
             cv2.imshow("imgThresh", licPlate.imgThresh)
 
@@ -70,7 +69,7 @@ def main(path):
 
         writeLicensePlateCharsOnImage(imgOriginalScene, licPlate)           # write license plate text on the image
 
-        if showSteps == True:
+        if DetectPlates.showSteps == True:
             cv2.imshow("imgOriginalScene", imgOriginalScene)                # re-show scene image
 
         pilImg = cv2.cvtColor(imgOriginalScene, cv2.COLOR_BGR2RGB)
@@ -157,7 +156,6 @@ class Application(tk.Frame):
 
     def create_widgets(self):
         self.btnSpace = Button(master = self, text = " ", padx=80)  #thông số button
-        self.btnSpace["command"] = a                  #event click cho button
         self.btnSpace.pack(side = "top")                                #đặt button vào form
 
         self.btnGetImage = Button(master = self, text = "Chọn ảnh") #thông số button
@@ -189,7 +187,7 @@ class Application(tk.Frame):
         self.mainImage.pack(side="left")                                                            #đặt canvas vào form
 
     def browseFiles(self):
-        self.getListImage = filedialog.askopenfilenames(initialdir = "/", title = "Select a File", filetypes = (("all files", "*.*"), ("Text files", "*.txt*")))
+        self.getListImage = filedialog.askopenfilenames(initialdir = ".", title = "Select a File", filetypes = (("all files", "*.*"), ("Text files", "*.txt*")))
         listImage = list(self.getListImage)
         self.LoadImageList(self.getListImage)
         self.LoadImage(self.getListImage[0])
@@ -203,10 +201,28 @@ class Application(tk.Frame):
     def LoadImageList(self, listImage):
         for widget in self.slideImage.winfo_children():
             widget.destroy()
-        #self.slideImage = LabelFrame(master = self, width = 200, height = 500, text="Danh sách ảnh")
-        #self.slideImage.pack_propagate(0)
+
+        vscrollbar = Scrollbar(self.slideImage)
+        vscrollbar.pack( side = RIGHT, fill = Y )
+
+        hscrollbar = Scrollbar(self.slideImage, orient = 'horizontal')
+        hscrollbar.pack( side = BOTTOM, fill = X )
+
+        myList = Listbox(master = self.slideImage, width = 200, height = 500, yscrollcommand = vscrollbar.set, xscrollcommand = hscrollbar.set)
+        myList.pack( side = LEFT, fill = BOTH )
         for i in range (len(listImage)):
-            self.CreateLinkLabel(str(listImage[i]))
+            myList.insert(tk.END, listImage[i])
+
+        vscrollbar.config( command = myList.yview )
+        hscrollbar.config( command = myList.xview )
+
+        def onselect(event):
+            w = event.widget
+            idx = int(w.curselection()[0])
+            value = w.get(idx)
+            self.LoadImage(value)
+
+        myList.bind('<<ListboxSelect>>', onselect)
 
     def CreateLinkLabel(self, link):
         label = Label(master = self.slideImage, text = os.path.basename(link), fg="blue", cursor="hand2")

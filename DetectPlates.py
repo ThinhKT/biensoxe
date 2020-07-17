@@ -21,14 +21,6 @@ showSteps = False
 PLATE_WIDTH_PADDING_FACTOR = 1.3
 PLATE_HEIGHT_PADDING_FACTOR = 1.3
 
-#các biến lưu để xem step
-img1a = None
-img1b = None
-img2a = None
-img2b = None
-img3 = None
-img4a = None
-
 ###################################################################################################
 def detectPlatesInScene(imgOriginalScene):
     listOfPossiblePlates = []                   # this will be the return value
